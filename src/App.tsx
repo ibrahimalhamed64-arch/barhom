@@ -3,18 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { Mail, Heart, Sparkles } from 'lucide-react';
+import { Mail, Heart, Sparkles, Music, Music2 } from 'lucide-react';
 
 export default function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [recipientName] = useState('أحلى الناس'); // Default name in Arabic
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const handleOpen = () => {
     if (!isOpen) {
       setIsOpen(true);
+      
+      // Play music
+      if (audioRef.current) {
+        audioRef.current.play().catch(err => console.log("Playback blocked:", err));
+        setIsPlaying(true);
+      }
+
       // Trigger confetti
       const duration = 3 * 1000;
       const animationEnd = Date.now() + duration;
@@ -36,8 +45,34 @@ export default function App() {
     }
   };
 
+  const toggleMusic = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative bg-[#fdfaf6]">
+      <audio 
+        ref={audioRef} 
+        src="https://assets.mixkit.co/music/preview/mixkit-beautiful-dream-493.mp3" 
+        loop 
+      />
+
+      {/* Music Toggle */}
+      <button 
+        onClick={toggleMusic}
+        className="absolute top-6 right-6 z-50 p-3 bg-white/80 backdrop-blur-sm rounded-full shadow-sm border border-rose-100 text-rose-500 hover:bg-rose-50 transition-all"
+      >
+        {isPlaying ? <Music className="w-5 h-5 animate-pulse" /> : <Music2 className="w-5 h-5 opacity-50" />}
+      </button>
+
       {/* Background Decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-rose-200 blur-3xl" />
@@ -117,9 +152,26 @@ export default function App() {
                     كل عام وأنت بخير
                   </h2>
                   <div className="h-px w-24 bg-rose-200 mx-auto" />
+                  
                   <p className="font-serif text-xl md:text-2xl text-rose-800 leading-relaxed italic">
                     "أحياناً يكون العيد شخص لست بانتظار عيداً لأهنئك إنما وجودك معي عيدي دائماً ان شاء الله دايما على طول اشوفك مبسوطه يارب وتتهني بالعيد يارب الله يسعدك يارب يوفقك ويبعد عنك كل حسود كنتي بتجنني زي القمر ❣."
                   </p>
+
+                  {/* 50 Dinar Image (Eidiya) */}
+                  <motion.div
+                    initial={{ y: 20, opacity: 0, rotate: 2 }}
+                    animate={{ y: 0, opacity: 1, rotate: 2 }}
+                    transition={{ delay: 1.2, duration: 0.6 }}
+                    className="relative w-full max-w-[280px] mx-auto mt-8 aspect-[2/1] rounded-md overflow-hidden shadow-lg border border-rose-100 group"
+                  >
+                    <img 
+                      src="https://upload.wikimedia.org/wikipedia/commons/e/e3/Jordan_50_Dinars_2022_Obverse.jpg" 
+                      alt="50 Dinars"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+                  </motion.div>
                 </div>
 
                 <div className="pt-8 flex flex-col items-center gap-4">
